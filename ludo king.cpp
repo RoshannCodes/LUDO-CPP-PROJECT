@@ -164,6 +164,9 @@ public:
         else {
 
             PathIndex += steps;
+            if (PathIndex == 56) {
+                inFinalHome = true;
+            }
             setPosition(PiecePath[ColorIndex][PathIndex]);
             
         }
@@ -178,6 +181,7 @@ public:
     bool isInPlay() const {
         return inPlay;
     }
+    
 };
 
 
@@ -186,10 +190,10 @@ public:
     Color color;
     int colorIndex;
     Piece pieces[4];
-    bool hasWon;
+    
 
 
-    Player(Color color, int ci) : color(color), colorIndex(ci), hasWon(false),
+    Player(Color color, int ci) : color(color), colorIndex(ci),
         pieces{ Piece(color,Home[ci][0],ci) ,Piece(color,Home[ci][1],ci), Piece(color,Home[ci][2],ci), Piece(color,Home[ci][3],ci) } { }
 
 
@@ -205,11 +209,8 @@ public:
 
         }
     }
-
-    bool allPiecesHome() const {
-        // This should be updated to check if all pieces have reached the final position.
-        return false;
-    }
+    
+   
 };
 
 class Board {
@@ -226,6 +227,7 @@ public:
         while (!gameOver()) {
             update();
         }
+
         std::cout << "Player " << currentPlayerIndex + 1 << " has won the game!" << std::endl;
     }
 
@@ -357,9 +359,34 @@ private:
         }
 
         // Move piece is only run when at least one piece is moveable
-        if (flag3 == 0) {
+                
+        if (flag3 == 0){
+            if ( !(diceValue == 1 && currentPlayer.pieces[moveIndex].isInHome()) ) {
+                int InitialIndex = currentPlayer.pieces[moveIndex].PathIndex;
+                for (int k = 0; k < diceValue; k++) {
+                    
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    DrawLudoBoard();
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (!((i == currentPlayerIndex) && (j == moveIndex))) {
+                                DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+                            }
+                            else {
+                                DrawPiece(PiecePath[currentPlayer.colorIndex][InitialIndex + k], currentPlayer.color);
+                            }
+                        }
+                                               
+                    }
+                    DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
+                    EndDrawing();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
+            }
             currentPlayer.movePiece(moveIndex, diceValue);
         }
+      
 
         for (int i = 0; i < 4; i++) {
 
@@ -372,9 +399,7 @@ private:
                 }
             }
         }
-        if (currentPlayer.allPiecesHome()) {
-            currentPlayer.hasWon = true;
-        }
+        
         
         if (diceValue == 1 || diceValue == 6){
             if (diceValue == 6) {
@@ -382,8 +407,9 @@ private:
             }
         }
         else {
-
-            nextTurn();
+            if (!(gameOver()) ){
+                nextTurn();
+            }
         } 
     }
 
@@ -395,11 +421,11 @@ private:
 
     bool gameOver() const {
         for (int i = 0; i < 4; i++) {
-            if (players[i].hasWon) {
-                return true;
+            if (!(players[currentPlayerIndex].pieces[i].inFinalHome)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 };
 
