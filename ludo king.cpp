@@ -10,6 +10,9 @@
 
 //enum Color { RED, GREEN, BLUE, YELLOW };
 
+enum GameState { MENU, PLAYING, GAMEOVER };
+GameState currentGameState = MENU;
+
 const int screenWidth = 1000;
 const int screenHeight = 1000;
 const int boardSize = 810;
@@ -407,22 +410,47 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Ludo Game");
     SetTargetFPS(60);
 
+    
+    Board board;
+    float textAlpha = 0.0f;  
 
     while (!WindowShouldClose()) {
-        // Update
-        ClearBackground(RAYWHITE);
         BeginDrawing();
-        DrawLudoBoard();
+
+      
+        ClearBackground(DARKGREEN);
+        //DrawRectangleGradientV(0, 0, screenWidth, screenHeight, RED, BLUE);
+        DrawRectangle(0, 0, screenWidth / 2, screenHeight / 2, RED);
+        DrawRectangle( screenWidth / 2, 0, screenWidth,  screenHeight / 2, BLUE);
+        DrawRectangle( 0,  screenHeight / 2, screenWidth / 2, screenHeight, GREEN);
+        DrawRectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, YELLOW);
+
+        if (currentGameState == MENU) {
+          
+            DrawText("Welcome to Ludo Game!", screenWidth / 2 - 250, screenHeight / 3, 40, GOLD);
+
+            textAlpha = sin(GetTime() * 2) * 0.5f + 0.5f; 
+            DrawTextEx(GetFontDefault(), "Press ENTER to Start",
+                Vector2{ screenWidth / 2 - 150, screenHeight / 4 +30},
+                20, 2, Fade(BLACK, textAlpha));
+
+      
+            DrawText("Contributors: Papu Chaudhary, Rhythm Adhikari, Roshan Koirala, Sabin Shrestha",
+                20, screenHeight - 60, 24, BLACK);
+
+            if (IsKeyPressed(KEY_ENTER)) {
+                currentGameState = PLAYING; 
+            }
+        }
+        else if (currentGameState == PLAYING) {
+           
+            DrawLudoBoard();  
+            board.startGame();  
+        }
+
         EndDrawing();
-
-        Board board;
-        board.startGame();
-
-
     }
 
     CloseWindow();
     return 0;
-
-
 }
