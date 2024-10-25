@@ -148,6 +148,9 @@ public:
     }
 
     void move(int steps) {
+        if ((56 - PathIndex) < steps) {
+            return;
+                  }
         if (inHome && steps == 1) {
             inHome = false;
             inPlay = true;
@@ -159,8 +162,7 @@ public:
 
             PathIndex += steps;
             setPosition(PiecePath[ColorIndex][PathIndex]);
-
-
+            
         }
 
     }
@@ -226,132 +228,165 @@ public:
 
 private:
     int currentPlayerIndex;
+    static int count;
 
-   void update() {
-    Player& currentPlayer = players[currentPlayerIndex];
-    static int diceValue = 1;
-    bool rolling = false; // Flag for dice rolling state
-    float rollTime = 0.0f; // Timer for dice roll animation
-    int flag = 0;
+    void update() {
+        Player& currentPlayer = players[currentPlayerIndex];
+        static int diceValue = 1;
+        bool rolling = false; // Flag for dice rolling state
+        float rollTime = 0.0f; // Timer for dice roll animation
+        int flag = 0;
 
-    while (!flag) {
-        if (IsKeyPressed(KEY_SPACE)) {
-            rolling = true;
-        }
-
-        if (rolling) {
-            rollTime += GetFrameTime(); // Increment roll timer
-            if (rollTime >= rollDuration) {
-                rolling = false;
-                diceValue = currentPlayer.rollDice(); // Random dice value between 1 and 6
-                flag = 1;
-            } else {
-                // Optional: Simulate rolling by randomly changing diceValue
-                diceValue = currentPlayer.rollDice();
+        while (!flag) {
+            if (IsKeyPressed(KEY_SPACE)) {
+                rolling = true;
             }
-        }
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawLudoBoard();
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+
+            if (rolling) {
+                rollTime += GetFrameTime(); // Increment roll timer
+                if (rollTime >= rollDuration) {
+                    rolling = false;
+                    diceValue = currentPlayer.rollDice(); // Random dice value between 1 and 6
+                    flag = 1;
+                }
+                else {
+                    // Optional: Simulate rolling by randomly changing diceValue
+                    diceValue = currentPlayer.rollDice();
+                }
             }
-        }
-
-        DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
-        EndDrawing();
-    }
-
-    int moveIndex = 0;
-    int flag1 = 0;
-    int flag3 = 1;
-
-    // Check if step is not equal to 1 and all pieces are in home then we have to skip turn for the current player
-    if (diceValue != 1) {
-        for (int i = 0; i < 4; i++) {
-            if (currentPlayer.pieces[i].isInPlay()) {
-                flag3 = 0;
-                break;
-            }
-        }
-    } else {
-        flag3 = 0;
-    }
-
-    // If at least one player is in play or dice value is 1
-    if (flag3 == 0) {
-        while (true) {
-            int flag2 = 0;
             BeginDrawing();
             ClearBackground(RAYWHITE);
             DrawLudoBoard();
-            DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
-
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
                 }
             }
 
-            for (int i = 0; i < 4; i++) {
-                Position p = currentPlayer.pieces[i].getPosition();
-                Vector2 CircleCenter = { static_cast<float>(p.x), static_cast<float>(p.y) };
-                float CircleRadius1 = 23.0f;
+            DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
+            EndDrawing();
+        }
 
-                if (CheckCollisionPointCircle(GetMousePosition(), CircleCenter, CircleRadius1)) {
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                        moveIndex = i;
-                        flag1 = 1; // User selects piece
-                        // If dice not equal to 1 and piece user selecting is in home
-                        if (diceValue != 1 && currentPlayer.pieces[moveIndex].isInHome()) {
-                            DrawText("Please select the allowed pieces", 100, 46, 20, BLACK);
-                            // flag2 is 1 when unwanted piece is selected
-                            flag2 = 1;
-                            flag1 = 0; // As unwanted piece is selected then user should reselect valid piece
-                        }
-                        break;
+        int moveIndex = 0;
+        int flag1 = 0;
+        int flag3 = 1;
+
+        // Check if step is not equal to 1 and all pieces are in home then we have to skip turn for the current player
+        if (diceValue != 1) {
+            for (int i = 0; i < 4; i++) {
+
+                if (currentPlayer.pieces[i].isInPlay() && (56 - currentPlayer.pieces[i].PathIndex) >= diceValue) {
+                    flag3 = 0;
+                    break;
+                }
+
+            }
+        }
+        else {
+            flag3 = 0;
+        }
+
+        if (diceValue == 1 ) {
+            count++;
+            if (count == 3) {
+
+                int largest = 0;
+                int index = 0;
+                for (int i = 0; i < 4; i++) {
+
+                    if ( (largest < currentPlayer.pieces[i].PathIndex) && currentPlayer.pieces[i].PathIndex!=56) {
+                        largest = currentPlayer.pieces[i].PathIndex;
+                        index = i;
                     }
                 }
-            }
-            EndDrawing();
-            // For the message of "please select the allowed pieces" to last 2 seconds on screen
-            if (flag2 == 1) {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-            }
-
-            // If one valid piece is selected then loop breaks
-            if (flag1 == 1) {
-                break;
+                currentPlayer.pieces[index].setInitialPos();
+                nextTurn();
+                return;
             }
         }
-    }
 
-    // Move piece is only run when at least one piece is moveable
-    if (flag3 == 0) {
-        currentPlayer.movePiece(moveIndex, diceValue);
-    }
+        // If at least one player is in play or dice value is 1
+        if (flag3 == 0) {
+            while (true) {
+                int flag2 = 0;
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawLudoBoard();
+                DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
 
-    for (int i = 0; i < 4; i++) {
-
-        for (int j = 0; j < 4; j++) {
-            if ( (i != currentPlayerIndex) && (!isInStar(players[i].pieces[j].getPosition())) ) {
-                if (currentPlayer.pieces[moveIndex].getPosition() == players[i].pieces[j].getPosition()) {
-                    players[i].pieces[j].setInitialPos();
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+                    }
                 }
 
+                for (int i = 0; i < 4; i++) {
+                    Position p = currentPlayer.pieces[i].getPosition();
+                    Vector2 CircleCenter = { static_cast<float>(p.x), static_cast<float>(p.y) };
+                    float CircleRadius1 = 23.0f;
+
+                    if (CheckCollisionPointCircle(GetMousePosition(), CircleCenter, CircleRadius1)) {
+                        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                            moveIndex = i;
+                            flag1 = 1; // User selects piece
+                            // If dice not equal to 1 and piece user selecting is in home
+                            if ((diceValue != 1 && currentPlayer.pieces[moveIndex].isInHome()) || ((56 - currentPlayer.pieces[moveIndex].PathIndex) < diceValue)) {
+                                DrawText("Please select the allowed pieces", 100, 46, 20, BLACK);
+                                // flag2 is 1 when unwanted piece is selected
+                                flag2 = 1;
+                                flag1 = 0; // As unwanted piece is selected then user should reselect valid piece
+                            }
+                            break;
+                        }
+                    }
+                }
+                EndDrawing();
+                // For the message of "please select the allowed pieces" to last 2 seconds on screen
+                if (flag2 == 1) {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                }
+
+                // If one valid piece is selected then loop breaks
+                if (flag1 == 1) {
+                    break;
+                }
             }
         }
-    }
-    if (currentPlayer.allPiecesHome()) {
-        currentPlayer.hasWon = true;
-    }
 
-    nextTurn();
-}
+        // Move piece is only run when at least one piece is moveable
+        if (flag3 == 0) {
+            currentPlayer.movePiece(moveIndex, diceValue);
+        }
+
+        for (int i = 0; i < 4; i++) {
+
+            for (int j = 0; j < 4; j++) {
+                if ((i != currentPlayerIndex) && (!isInStar(players[i].pieces[j].getPosition()))) {
+                    if (currentPlayer.pieces[moveIndex].getPosition() == players[i].pieces[j].getPosition()) {
+                        players[i].pieces[j].setInitialPos();
+                    }
+
+                }
+            }
+        }
+        if (currentPlayer.allPiecesHome()) {
+            currentPlayer.hasWon = true;
+        }
+        
+        if (diceValue == 1 || diceValue == 6){
+            if (diceValue == 6) {
+                count = 0;
+            }
+        }
+        else {
+
+            nextTurn();
+        } 
+    }
 
 
     void nextTurn() {
+        count = 0;
         currentPlayerIndex = (currentPlayerIndex + 1) % 4;
     }
 
@@ -364,6 +399,8 @@ private:
         return false;
     }
 };
+
+int Board:: count = 0;
 
 int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
