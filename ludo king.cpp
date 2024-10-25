@@ -52,6 +52,20 @@ void DrawPiece(Position position1, Color color) {
 }
 
 
+std::vector<Position> StarPath = {
+    {176,446},{446,824} ,{ 824,554 },{554,176},{230,554},{554,770},{770,446},{446,230}
+
+};
+
+bool isInStar(Position pos) {
+    for (int i = 0; i < 8; i++) {
+        if (StarPath[i] == pos) {
+            return true;
+        }
+        
+    }
+    return false;
+}
 
 std::vector<Position> ludoPath = {
     {176,446},{230,446},{284,446},{338,446},{392,446},{446,392},{446,338},{446,284},{446,230},{446,176},{446,122},{500,122},{554,122},{554,176},
@@ -124,7 +138,11 @@ public:
     void setPosition(const Position& newPos) {
         position = newPos;
     }
-
+    void setInitialPos() {
+        position = InitialPosition;
+        inPlay = false;
+        inHome = true;
+    }
     Position getPosition() {
         return position;
     }
@@ -312,6 +330,18 @@ private:
     // Move piece is only run when at least one piece is moveable
     if (flag3 == 0) {
         currentPlayer.movePiece(moveIndex, diceValue);
+    }
+
+    for (int i = 0; i < 4; i++) {
+
+        for (int j = 0; j < 4; j++) {
+            if ( (i != currentPlayerIndex) && (!isInStar(players[i].pieces[j].getPosition())) ) {
+                if (currentPlayer.pieces[moveIndex].getPosition() == players[i].pieces[j].getPosition()) {
+                    players[i].pieces[j].setInitialPos();
+                }
+
+            }
+        }
     }
     if (currentPlayer.allPiecesHome()) {
         currentPlayer.hasWon = true;
