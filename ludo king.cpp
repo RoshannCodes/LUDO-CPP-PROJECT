@@ -275,14 +275,17 @@ private:
         int moveIndex = 0;
         int flag1 = 0;
         int flag3 = 1;
-
+        int PiecesInPlay = 0;
+        int PieceIndexInPlay = 0;
         // Check if step is not equal to 1 and all pieces are in home then we have to skip turn for the current player
         if (diceValue != 1) {
             for (int i = 0; i < 4; i++) {
 
                 if (currentPlayer.pieces[i].isInPlay() && (56 - currentPlayer.pieces[i].PathIndex) >= diceValue) {
                     flag3 = 0;
-                    break;
+                    PiecesInPlay++;
+                    PieceIndexInPlay = i;
+
                 }
 
             }
@@ -310,8 +313,11 @@ private:
             }
         }
 
+        if (PiecesInPlay == 1) {
+            moveIndex = PieceIndexInPlay;
+        }
         // If at least one player is in play or dice value is 1
-        if (flag3 == 0) {
+        if (flag3 == 0 && PiecesInPlay!=1) {
             while (true) {
                 int flag2 = 0;
                 BeginDrawing();
@@ -387,13 +393,14 @@ private:
             currentPlayer.movePiece(moveIndex, diceValue);
         }
       
-
+        bool kill = false;
         for (int i = 0; i < 4; i++) {
 
             for (int j = 0; j < 4; j++) {
                 if ((i != currentPlayerIndex) && (!isInStar(players[i].pieces[j].getPosition()))) {
                     if (currentPlayer.pieces[moveIndex].getPosition() == players[i].pieces[j].getPosition()) {
                         players[i].pieces[j].setInitialPos();
+                        kill = true;
                     }
 
                 }
@@ -401,7 +408,7 @@ private:
         }
         
         
-        if (diceValue == 1 || diceValue == 6){
+        if (diceValue == 1 || diceValue == 6 || kill){
             if (diceValue == 6) {
                 count = 0;
             }
