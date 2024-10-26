@@ -244,6 +244,9 @@ private:
         float rollTime = 0.0f; // Timer for dice roll animation
         int flag = 0;
 
+        bool faded = true;
+
+
         while (!flag) {
             if (IsKeyPressed(KEY_SPACE)) {
                 rolling = true;
@@ -255,23 +258,41 @@ private:
                     rolling = false;
                     diceValue = currentPlayer.rollDice(); // Random dice value between 1 and 6
                     flag = 1;
+                    faded = false;
                 }
                 else {
                     // Optional: Simulate rolling by randomly changing diceValue
                     diceValue = currentPlayer.rollDice();
                 }
             }
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawLudoBoard();
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+            if (faded == true) {
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawLudoBoard(currentPlayer.color);
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+                    }
                 }
-            }
 
-            DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
-            EndDrawing();
+                DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
+                EndDrawing();
+               
+            }
+            else {
+
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawLudoBoard();
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        DrawPiece(players[i].pieces[j].getPosition(), playersColors[i]);
+                    }
+                }
+
+                DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
+                EndDrawing();
+            }
         }
 
         int moveIndex = 0;

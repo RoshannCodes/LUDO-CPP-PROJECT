@@ -10,6 +10,15 @@ extern const int cellSize;
 
 extern const Color playersColors[4];
 
+Color LightenColor(Color color, float amount) {
+    return {
+        (unsigned char)(color.r + (255 - color.r) * amount),
+        (unsigned char)(color.g + (255 - color.g) * amount),
+        (unsigned char)(color.b + (255 - color.b) * amount),
+        color.a
+    };
+}
+
 void DrawStar(int centerX, int centerY, int radius, int points, Color color) {
     Vector2* vertices = new Vector2[points * 2];
     float angleStep = PI / points;
@@ -26,8 +35,19 @@ void DrawStar(int centerX, int centerY, int radius, int points, Color color) {
 
     delete[] vertices;
 
-}void DrawLudoBoard() {
+}void DrawLudoBoard(Color fadeColor = BLANK) {
     // Draw base square
+
+    Color redHomeColor = (fadeColor.r == playersColors[0].r && fadeColor.g == playersColors[0].g && fadeColor.b == playersColors[0].b)
+        ? LightenColor(playersColors[0], 0.2f) : playersColors[0];
+    Color greenHomeColor = (fadeColor.r == playersColors[1].r && fadeColor.g == playersColors[1].g && fadeColor.b == playersColors[1].b)
+        ? LightenColor(playersColors[1], 0.4f) : playersColors[1];
+    Color yellowHomeColor = (fadeColor.r == playersColors[2].r && fadeColor.g == playersColors[2].g && fadeColor.b == playersColors[2].b)
+        ? LightenColor(playersColors[2], 0.4f) : playersColors[2];
+    Color blueHomeColor = (fadeColor.r == playersColors[3].r && fadeColor.g == playersColors[3].g && fadeColor.b == playersColors[3].b)
+        ? LightenColor(playersColors[3], 0.4f) : playersColors[3];
+
+
     DrawRectangle((screenWidth - boardSize) / 2, (screenHeight - boardSize) / 2, boardSize, boardSize, WHITE);
     // Draw safe zone
     DrawRectangle((screenWidth - boardSize + 2 * cellSize) / 2, (screenHeight - cellSize) / 2, 5 * cellSize, cellSize, playersColors[0]);
@@ -59,10 +79,11 @@ void DrawStar(int centerX, int centerY, int radius, int points, Color color) {
     }
 
     // Draw home areas
-    DrawRectangle((screenWidth - boardSize) / 2, (screenHeight - boardSize) / 2, cellSize * 6, cellSize * 6, playersColors[0]); // Red Home
-    DrawRectangle((screenWidth + boardSize) / 2 - cellSize * 6, (screenHeight - boardSize) / 2, cellSize * 6, cellSize * 6, playersColors[1]); // Green Home
-    DrawRectangle((screenWidth - boardSize) / 2, (screenHeight + boardSize) / 2 - cellSize * 6, cellSize * 6, cellSize * 6, playersColors[3]); // Blue Home
-    DrawRectangle((screenWidth + boardSize) / 2 - cellSize * 6, (screenHeight + boardSize) / 2 - cellSize * 6, cellSize * 6, cellSize * 6, playersColors[2]); // Yellow Home
+    DrawRectangle((screenWidth - boardSize) / 2, (screenHeight - boardSize) / 2, cellSize * 6, cellSize * 6, redHomeColor); // Red Home
+    DrawRectangle((screenWidth + boardSize) / 2 - cellSize * 6, (screenHeight - boardSize) / 2, cellSize * 6, cellSize * 6, greenHomeColor); // Green Home
+    DrawRectangle((screenWidth - boardSize) / 2, (screenHeight + boardSize) / 2 - cellSize * 6, cellSize * 6, cellSize * 6, blueHomeColor); // Blue Home
+    DrawRectangle((screenWidth + boardSize) / 2 - cellSize * 6, (screenHeight + boardSize) / 2 - cellSize * 6, cellSize * 6, cellSize * 6, yellowHomeColor); // Yellow Home
+
     // Inside home areas
     DrawRectangle((screenWidth - boardSize + 2 * cellSize) / 2, (screenHeight - boardSize + 2 * cellSize) / 2, cellSize * 4, cellSize * 4, RAYWHITE);
     DrawRectangle((screenWidth + 5 * cellSize) / 2, (screenHeight - boardSize + 2 * cellSize) / 2, cellSize * 4, cellSize * 4, RAYWHITE);
