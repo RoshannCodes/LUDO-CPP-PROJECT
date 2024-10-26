@@ -137,6 +137,15 @@
     <ClInclude Include="board.h" />
     <ClInclude Include="dice.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="fonts\Roboto-Medium.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="images\ludo4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="sounds\background.wav" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
