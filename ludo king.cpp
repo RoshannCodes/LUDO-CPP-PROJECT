@@ -23,6 +23,7 @@ const float rollDuration = 0.5f; // Duration of dice roll animation
 float dicePosX = screenWidth / 2 - diceSize / 2;
 float dicePosY = screenHeight / 2 - diceSize / 2;
 
+
 class Position {
 public:
     int x, y;
@@ -65,7 +66,7 @@ bool isInStar(Position pos) {
         if (StarPath[i] == pos) {
             return true;
         }
-        
+
     }
     return false;
 }
@@ -153,7 +154,7 @@ public:
     void move(int steps) {
         if ((56 - PathIndex) < steps) {
             return;
-                  }
+        }
         if (inHome && steps == 1) {
             inHome = false;
             inPlay = true;
@@ -168,7 +169,7 @@ public:
                 inFinalHome = true;
             }
             setPosition(PiecePath[ColorIndex][PathIndex]);
-            
+
         }
 
     }
@@ -181,7 +182,7 @@ public:
     bool isInPlay() const {
         return inPlay;
     }
-    
+
 };
 
 
@@ -190,11 +191,12 @@ public:
     Color color;
     int colorIndex;
     Piece pieces[4];
-    
+
 
 
     Player(Color color, int ci) : color(color), colorIndex(ci),
-        pieces{ Piece(color,Home[ci][0],ci) ,Piece(color,Home[ci][1],ci), Piece(color,Home[ci][2],ci), Piece(color,Home[ci][3],ci) } { }
+        pieces{ Piece(color,Home[ci][0],ci) ,Piece(color,Home[ci][1],ci), Piece(color,Home[ci][2],ci), Piece(color,Home[ci][3],ci) } {
+    }
 
 
     int rollDice() {
@@ -209,8 +211,8 @@ public:
 
         }
     }
-    
-   
+
+
 };
 
 class Board {
@@ -294,7 +296,7 @@ private:
             flag3 = 0;
         }
 
-        if (diceValue == 1 ) {
+        if (diceValue == 1) {
             count++;
             if (count == 3) {
 
@@ -302,7 +304,7 @@ private:
                 int index = 0;
                 for (int i = 0; i < 4; i++) {
 
-                    if ( (largest < currentPlayer.pieces[i].PathIndex) && currentPlayer.pieces[i].PathIndex!=56) {
+                    if ((largest < currentPlayer.pieces[i].PathIndex) && currentPlayer.pieces[i].PathIndex != 56) {
                         largest = currentPlayer.pieces[i].PathIndex;
                         index = i;
                     }
@@ -365,12 +367,12 @@ private:
         }
 
         // Move piece is only run when at least one piece is moveable
-                
-        if (flag3 == 0){
-            if ( !(diceValue == 1 && currentPlayer.pieces[moveIndex].isInHome()) ) {
+
+        if (flag3 == 0) {
+            if (!(diceValue == 1 && currentPlayer.pieces[moveIndex].isInHome())) {
                 int InitialIndex = currentPlayer.pieces[moveIndex].PathIndex;
                 for (int k = 0; k < diceValue; k++) {
-                    
+
                     BeginDrawing();
                     ClearBackground(RAYWHITE);
                     DrawLudoBoard();
@@ -383,7 +385,7 @@ private:
                                 DrawPiece(PiecePath[currentPlayer.colorIndex][InitialIndex + k], currentPlayer.color);
                             }
                         }
-                                               
+
                     }
                     DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
                     EndDrawing();
@@ -392,8 +394,9 @@ private:
             }
             currentPlayer.movePiece(moveIndex, diceValue);
         }
-      
+
         bool kill = false;
+
         for (int i = 0; i < 4; i++) {
 
             for (int j = 0; j < 4; j++) {
@@ -406,6 +409,7 @@ private:
                 }
             }
         }
+
         
         
         if (diceValue == 1 || diceValue == 6 || kill){
@@ -414,10 +418,10 @@ private:
             }
         }
         else {
-            if (!(gameOver()) ){
+            if (!(gameOver())) {
                 nextTurn();
             }
-        } 
+        }
     }
 
 
@@ -436,54 +440,75 @@ private:
     }
 };
 
-int Board:: count = 0;
+int Board::count = 0;
 
 int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
     InitWindow(screenWidth, screenHeight, "Ludo Game");
+    InitAudioDevice();
+
+    Texture2D background = LoadTexture("images/ludo4.png");
+    Font robotoMedium = LoadFont("font/Roboto-Medium.ttf");
+    Sound backgroundSound = LoadSound("sounds/background.wav");
+
+
     SetTargetFPS(60);
 
-    
+
+
     Board board;
-    float textAlpha = 0.0f;  
+    float textAlpha = 0.0f;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-      
-        ClearBackground(DARKGREEN);
-        //DrawRectangleGradientV(0, 0, screenWidth, screenHeight, RED, BLUE);
-        DrawRectangle(0, 0, screenWidth / 2, screenHeight / 2, RED);
-        DrawRectangle( screenWidth / 2, 0, screenWidth,  screenHeight / 2, BLUE);
-        DrawRectangle( 0,  screenHeight / 2, screenWidth / 2, screenHeight, GREEN);
-        DrawRectangle(screenWidth / 2, screenHeight / 2, screenWidth, screenHeight, YELLOW);
+        ClearBackground(WHITE);
 
         if (currentGameState == MENU) {
-          
-            DrawText("Welcome to Ludo Game!", screenWidth / 2 - 250, screenHeight / 3, 40, GOLD);
+            if (!IsSoundPlaying(backgroundSound)) {
+                PlaySound(backgroundSound); // Play sound only if not already playing
+            }
+            DrawTexture(background, 0, 0, WHITE);
 
-            textAlpha = sin(GetTime() * 2) * 0.5f + 0.5f; 
-            DrawTextEx(GetFontDefault(), "Press ENTER to Start",
-                Vector2{ screenWidth / 2 - 150, screenHeight / 4 +30},
-                20, 2, Fade(BLACK, textAlpha));
+            textAlpha = sin(GetTime() * 2) * 0.5f + 0.5f;
+            DrawTextEx(robotoMedium, "Press ENTER to Start",
+                Vector2{ screenWidth / 3   , 300 },
+                24, 2, Fade(WHITE, textAlpha));
 
-      
-            DrawText("Contributors: Papu Chaudhary, Rhythm Adhikari, Roshan Koirala, Sabin Shrestha",
-                20, screenHeight - 60, 24, BLACK);
+
+            DrawTextEx(robotoMedium, "Papu Chaudhary", Vector2{
+                screenHeight / 2 - 120, 750
+                },
+                24, 2, WHITE);
+            DrawTextEx(robotoMedium, "Rhythm Adhikari", Vector2{
+                screenHeight / 2 - 120, 780
+                },
+                24, 2, WHITE);
+            DrawTextEx(robotoMedium, "Roshan Koirala", Vector2{
+                screenHeight / 2 - 120, 810
+                },
+                24, 2, WHITE);
+            DrawTextEx(robotoMedium, "Sabin Shrestha", Vector2{
+                screenHeight / 2 - 120, 840
+                },
+                24, 2, WHITE);
 
             if (IsKeyPressed(KEY_ENTER)) {
-                currentGameState = PLAYING; 
+                StopSound(backgroundSound);
+                currentGameState = PLAYING;
             }
         }
         else if (currentGameState == PLAYING) {
-           
-            DrawLudoBoard();  
-            board.startGame();  
+
+            DrawLudoBoard();
+            board.startGame();
         }
 
         EndDrawing();
     }
-
+    UnloadTexture(background);
+    UnloadSound(backgroundSound);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
