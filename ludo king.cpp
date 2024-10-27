@@ -24,6 +24,10 @@ float dicePosX = screenWidth / 2 - diceSize / 2;
 float dicePosY = screenHeight / 2 - diceSize / 2;
 Sound DiceSound;
 Sound PieceSound;
+Sound KillSound;
+Sound FinalHomeSound;
+Sound OnStarSound;
+
 
 void PlayDice() {
     PlaySound(DiceSound);
@@ -31,6 +35,16 @@ void PlayDice() {
 
 void PlayPiece() {
     PlaySound(PieceSound);
+}
+
+void PlayFinalHome() {
+    PlaySound(FinalHomeSound);
+}
+
+
+
+void PlayKill() {
+    PlaySound(KillSound);
 }
 
 class Position {
@@ -177,6 +191,8 @@ public:
             PathIndex += steps;
             if (PathIndex == 56) {
                 inFinalHome = true;
+                PlaySound(FinalHomeSound);
+
             }
             setPosition(PiecePath[ColorIndex][PathIndex]);
 
@@ -239,8 +255,11 @@ public:
         while (!gameOver()) {
             update();
         }
+     
 
-        std::cout << "Player " << currentPlayerIndex + 1 << " has won the game!" << std::endl;
+
+        
+       /* std::cout << "Player " << currentPlayerIndex + 1 << " has won the game!" << std::endl;*/
     }
 
 private:
@@ -288,7 +307,7 @@ private:
 
                 DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
                 EndDrawing();
-               
+
             }
             else {
 
@@ -351,7 +370,7 @@ private:
             moveIndex = PieceIndexInPlay;
         }
         // If at least one player is in play or dice value is 1
-        if (flag3 == 0 && PiecesInPlay!=1) {
+        if (flag3 == 0 && PiecesInPlay != 1) {
             while (true) {
                 int flag2 = 0;
                 BeginDrawing();
@@ -429,6 +448,14 @@ private:
         }
 
         bool kill = false;
+        int isSoundPlayed = 0;
+
+        if (isInStar(currentPlayer.pieces[moveIndex].getPosition())) {
+            if (isSoundPlayed == 0) {
+                PlaySound(OnStarSound);
+                isSoundPlayed = 1;
+            }
+        }
 
         for (int i = 0; i < 4; i++) {
 
@@ -437,15 +464,16 @@ private:
                     if (currentPlayer.pieces[moveIndex].getPosition() == players[i].pieces[j].getPosition()) {
                         players[i].pieces[j].setInitialPos();
                         kill = true;
+                        PlaySound(KillSound);
                     }
 
                 }
             }
         }
 
-        
-        
-        if (diceValue == 1 || diceValue == 6 || kill){
+
+
+        if (diceValue == 1 || diceValue == 6 || kill) {
             if (diceValue == 6) {
                 count = 0;
             }
@@ -483,11 +511,18 @@ int main() {
     Texture2D background = LoadTexture("images/ludo4.png");
     Font robotoMedium = LoadFont("font/Roboto-Medium.ttf");
     Sound backgroundSound = LoadSound("sounds/background.wav");
-    PieceSound=LoadSound("sounds/piece.wav");
+    PieceSound = LoadSound("sounds/piece.wav");
+    KillSound = LoadSound("sounds/kill.wav");
+    OnStarSound = LoadSound("sounds/star.wav");
+    FinalHomeSound = LoadSound("sounds/finalhome.wav");
+
+
+
+
 
     SetTargetFPS(60);
 
-   
+
 
     Board board;
     float textAlpha = 0.0f;
@@ -537,8 +572,16 @@ int main() {
             board.startGame();
         }
 
+    
+
         EndDrawing();
     }
+
+    UnloadSound(OnStarSound);
+    UnloadSound(FinalHomeSound);
+    UnloadSound(KillSound);
+    UnloadSound(PieceSound);
+    UnloadSound(DiceSound);
     UnloadTexture(background);
     UnloadSound(backgroundSound);
     CloseAudioDevice();
