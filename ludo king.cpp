@@ -22,7 +22,16 @@ const int diceSize = 50;   // Size of the dice
 const float rollDuration = 0.5f; // Duration of dice roll animation
 float dicePosX = screenWidth / 2 - diceSize / 2;
 float dicePosY = screenHeight / 2 - diceSize / 2;
+Sound DiceSound;
+Sound PieceSound;
 
+void PlayDice() {
+    PlaySound(DiceSound);
+}
+
+void PlayPiece() {
+    PlaySound(PieceSound);
+}
 
 class Position {
 public:
@@ -160,6 +169,7 @@ public:
             inPlay = true;
             setPosition(PiecePath[ColorIndex][0]);
             PathIndex = 0;
+            PlayPiece();
 
         }
         else {
@@ -249,6 +259,7 @@ private:
 
         while (!flag) {
             if (IsKeyPressed(KEY_SPACE)) {
+                PlayDice();
                 rolling = true;
             }
 
@@ -410,6 +421,7 @@ private:
                     }
                     DrawDice((int)dicePosX, (int)dicePosY, diceValue, currentPlayer.color);
                     EndDrawing();
+                    PlayPiece();
                     std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 }
             }
@@ -467,15 +479,15 @@ int main() {
     srand(static_cast<unsigned int>(time(nullptr)));
     InitWindow(screenWidth, screenHeight, "Ludo Game");
     InitAudioDevice();
-
+    DiceSound = LoadSound("sounds/dice.mp3");
     Texture2D background = LoadTexture("images/ludo4.png");
     Font robotoMedium = LoadFont("font/Roboto-Medium.ttf");
     Sound backgroundSound = LoadSound("sounds/background.wav");
-
+    PieceSound=LoadSound("sounds/piece.wav");
 
     SetTargetFPS(60);
 
-
+   
 
     Board board;
     float textAlpha = 0.0f;

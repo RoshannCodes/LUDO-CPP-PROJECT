@@ -145,6 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="sounds\background.wav" />
+    <Media Include="sounds\dice.mp3" />
+    <Media Include="sounds\piece.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

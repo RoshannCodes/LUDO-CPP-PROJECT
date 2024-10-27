@@ -41,5 +41,11 @@
     <Media Include="sounds\background.wav">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="sounds\dice.mp3">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="sounds\piece.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>
